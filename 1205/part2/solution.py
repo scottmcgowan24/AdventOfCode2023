@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import re
+import math
 
 def main():
     file_path = 'input.txt'
@@ -22,7 +23,7 @@ def main():
 def sol(inputs):
     # First, we need to get the list of initial seeds to send through the transformations
     seed_numbers = []
-    outputs = []
+    min_value_seen = math.inf
     # If an input line contains the word map, it means we've moved on to the next transformation
     map_text = "map"
     seed_to_soil = []
@@ -54,27 +55,23 @@ def sol(inputs):
             list_of_transformations[transformation_index].append((int(conversion_nums[0]), int(conversion_nums[1]), int(conversion_nums[2])))
     # Outside of the for loop, we have set up all the transformation values and now we just have to loop through them
     # and get the output value for each seed.
-
-    # instead of looping through all the values, what we should do is look at the range which outputs the lowest possible values in each
-    # transformation and go backwards from there. This will result in values to consider at layer 6, then repeat for layer 5, layer 4, etc
-    # All the way to seed ranges which will result in the lowest possible values. If any of the available seeds fall into these ranges, consider
-    # These when looking for the lowest seed.
     for  i in range(0, len(seed_numbers), 2):
         initial_value = int(seed_numbers[i])
         end_value = initial_value + int(seed_numbers[i+1])
+        # diff = end_value - initial_value # Heuristic: Take difference, square root it, and use that as a step
         for j in range(initial_value, end_value):
-            print("NEW SEED")
             current_value = j
             # Loop through the transformations
             for transformation in list_of_transformations:
                 for val_range in transformation:
                     if current_value >= val_range[1] and current_value <= (val_range[1] + val_range[2]):
                         # If we're between the values, set it equal to the value + the offset
-                        print("Changing from " + str(current_value) + " to " + str(current_value + (val_range[0] - val_range[1])))
                         current_value = current_value + (val_range[0] - val_range[1])
                         break
-            outputs.append(current_value)
-    return min(outputs)
+            if current_value < min_value_seen:
+                print("Changing min value from " + str(min_value_seen) + " to " + str(current_value) + " in the step of " + str(initial_value) + " and " + seed_numbers[i+1] + ", seed # " + str(j))
+                min_value_seen = current_value
+    return min_value_seen
 
 if __name__ == "__main__":
     main()
